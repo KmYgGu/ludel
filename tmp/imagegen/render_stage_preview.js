@@ -1,0 +1,10 @@
+const fs=require('fs'),vm=require('vm');global.window=global;
+for(const p of ['js/core.js','js/input.js','js/physics.js','js/character.js','js/characters/rubania.js','js/bosses/slime.js','js/stages/outer-wall.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+Game.Fighter.prototype.load=()=>Promise.resolve();Game.Fighter.prototype.draw=()=>{};Game.Input.prototype.bind=()=>{};
+let active=true;const commands=[];
+const ctx={fillStyle:'#000',fillRect(x,y,w,h){if(active)commands.push({kind:'rect',color:this.fillStyle,x,y,w,h});},drawImage(source,sx,sy,sw,sh,x,y,w,h){if(active)commands.push({kind:'image',path:source.path,sx,sy,sw,sh,x,y,w,h});},fillText(){},strokeRect(){}};
+Game.SlimeEncounter.prototype.draw=()=>{active=false;};
+Game.loadImage=path=>Promise.resolve({path,width:path.includes('bat_sheet')?128:path.includes('stages/')?1280:768,height:path.includes('bat_sheet')?20:path.includes('stages/')?720:438});
+global.document={getElementById:()=>({getContext:()=>ctx})};let frame;global.requestAnimationFrame=f=>{frame=f;};
+vm.runInThisContext(fs.readFileSync('js/game.js','utf8'));
+setImmediate(()=>{frame(1);fs.writeFileSync('tmp/imagegen/stage-draw.json',JSON.stringify(commands));});

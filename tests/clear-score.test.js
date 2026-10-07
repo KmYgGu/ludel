@@ -1,0 +1,13 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+global.window=global;vm.runInThisContext(fs.readFileSync('js/core.js','utf8'));
+let score=Game.calculateClearScore(100,100,60*30);
+assert.deepEqual(score.rows.map(r=>r.score),[1000,1000,1000,300]);assert.equal(score.total,3300);
+score=Game.calculateClearScore(45,100,0);
+assert.deepEqual(score.rows.map(r=>r.score),[1000,450,0,0]);assert.equal(score.total,1450);
+Game.beginClearSequence(100,100,600);
+Game.advanceClearSequence(3300);assert.equal(Game.clearSequence.darkness,0);
+Game.advanceClearSequence(2000);assert.equal(Game.clearSequence.darkness,0);
+Game.advanceClearSequence(750);assert.equal(Game.clearSequence.darkness,.5);
+Game.advanceClearSequence(750);assert.equal(Game.clearSequence.darkness,1);
+Game.advanceClearSequence(5000);assert.equal(Game.clearSequence.elapsed,6800);
+console.log('PASS: clear/health/perfect/time scores, zero-time bonus, result reading delay and gradual fade to black.');

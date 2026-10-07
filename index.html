@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>루바니아</title>
+  <link rel="stylesheet" href="css/shop.css">
+  <link rel="stylesheet" href="css/mobile.css">
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-family: sans-serif;
+    }
+    canvas {
+      width: min(1280px, calc(100vw - 24px), calc((100vh - 100px) * 1.777778));
+      height: auto;
+      background: #3a3a3a;
+      image-rendering: pixelated;
+    }
+    p { margin: 10px 12px 0; max-width: 1280px; font-size: 14px; line-height: 1.5; text-align: center; }
+    .screen { position: relative; }
+    #title-screen { position: absolute; inset: 0; background: #17151d url('sprites/title/previews/gate-b-pixel-shading-v4.png') center/cover; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+    #title-screen[hidden], #main-menu[hidden], .menu-panel[hidden] { display: none; }
+    h1 { margin: 0; color: #e3d8c5; font-family: serif; font-size: clamp(32px, 6vw, 72px); letter-spacing: .18em; text-shadow: 3px 3px #100f16; }
+    .menu-panel { min-width: 220px; max-width: 80%; padding: 22px 30px; background: #111018e8; border: 1px solid #6e6470; color: #ded6cb; text-align: center; }
+    #main-menu { display: grid; gap: 12px; }
+    button { font: inherit; color: #e3d8c5; background: #211e29; border: 1px solid #756b78; padding: 10px 30px; cursor: pointer; }
+    button:hover, button:focus-visible { background: #3d3442; outline: 2px solid #d9c8a7; }
+    button:disabled { opacity: .5; cursor: wait; }
+    .menu-panel h2 { margin-top: 0; font-size: 20px; }
+    .menu-panel label { display: block; margin: 18px 0; }
+    #rank-list { padding-left: 24px; text-align: left; line-height: 1.8; }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <canvas id="game" width="1280" height="720"></canvas>
+    <div id="mobile-controls" hidden aria-label="터치 조작">
+      <div id="mobile-dodge" aria-label="백스텝 터치 영역"></div>
+      <div class="mobile-deck">
+        <div id="mobile-stick" aria-label="이동 조이패드"><span class="stick-arrows">▲<br>◀　　▶<br>▼</span><span id="mobile-stick-knob"></span></div>
+        <div class="mobile-actions">
+          <button id="mobile-attack" aria-label="공격"><span>⚔</span>공격</button>
+          <button id="mobile-jump" aria-label="점프"><span>↑</span>점프</button>
+          <button id="mobile-subweapon" aria-label="보조무기"><span>✦</span>보조무기</button>
+        </div>
+      </div>
+    </div>
+    <section id="title-screen" aria-label="타이틀">
+      <nav class="menu-panel" id="main-menu" aria-label="메인 메뉴">
+          <small id="debug-start-stage" aria-live="polite"></small>
+        <button id="start-game" disabled>게임시작</button>
+        <button id="open-settings">설정</button>
+        <button id="open-ranking">랭킹</button>
+      </nav>
+      <section class="menu-panel" id="settings-menu" hidden>
+        <h2>설정</h2>
+        <label><input type="checkbox" id="show-controls" checked> 조작 안내 표시</label>
+        <label class="mobile-setting"><input type="checkbox" id="reverse-mobile-controls"> 조작 버튼 좌우 반전</label>
+        <button id="fullscreen">전체 화면</button>
+        <button data-back>돌아가기</button>
+      </section>
+      <section class="menu-panel" id="ranking-menu" hidden>
+        <h2>랭킹</h2>
+        <p>이 브라우저의 슬라임 보스 클리어 기록</p>
+        <ol id="rank-list"></ol>
+        <button data-back>돌아가기</button>
+      </section>
+    </section>
+    <section id="death-screen" hidden class="death-screen">
+      <h2 id="death-title"></h2>
+      <p id="death-message"></p>
+      <button id="retry-stage">재도전</button>
+      <button id="return-shop" hidden>지난 클리어 상태로 상점에 돌아가기</button>
+      <button id="new-game" hidden>타이틀로</button>
+    </section>
+    <section id="shop-screen" hidden aria-label="슈르프의 상점">
+      <div class="shop-portrait"><canvas id="shop-portrait" width="263" height="248" role="img" aria-label="손님을 맞이하는 상점 주인 슈르프"></canvas></div>
+      <canvas id="shop-player-hud" width="300" height="125" aria-label="현재 체력과 마력"></canvas>
+      <section class="shop-stock">
+        <header><h2>슈르프의 상점</h2><span id="shop-score"></span></header>
+        <nav class="shop-categories" aria-label="품목 분류">
+          <button data-category="support" aria-pressed="true">강화·회복</button>
+          <button data-category="weapons" aria-pressed="false">서브 웨폰</button>
+          <button data-category="skills" aria-pressed="false">캐릭터 스킬</button>
+        </nav>
+        <div id="shop-items" aria-label="아이템 진열"></div>
+        <div class="shop-actions"><button id="shop-buy" disabled>구매</button><button id="shop-next">다음 스테이지</button></div>
+      </section>
+      <section class="shop-dialogue" aria-label="상점 주인의 대사">
+        <strong>슈르프</strong>
+        <p id="shop-speech" aria-live="polite"></p>
+      </section>
+      <div id="shop-fade" hidden></div>
+    </section>
+  </div>
+  <p>← → 이동 · 같은 방향 두 번 달리기 · ↓ 숙이기 · 숙인 채 Z 슬라이딩 · X 백스텝 · Z 점프 · 공중 ↓/대각+Z 하강킥 · Space 공격 · ↑ 위 공격 · C 서브웨폰 · 1 나이프 · 2 십자가 · 3 도끼 · 4 성수 · 5 회중시계 · 0 판정</p>
+  <script src="js/core.js"></script>
+  <script src="js/sprite-fit.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/character.js"></script>
+  <script src="js/characters/rubania.js"></script>
+  <script src="js/bosses/slime.js"></script>
+  <script src="js/stages/outer-wall.js"></script>
+  <script src="js/stages/wine-cellar.js"></script>
+  <script src="js/title.js"></script>
+  <script src="js/shop-system.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/hud.js"></script>
+  <script src="js/mobile.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
+

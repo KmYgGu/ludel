@@ -1,0 +1,16 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const p of ['js/core.js','js/physics.js','js/character.js','js/characters/rubania.js','js/bosses/slime.js','js/stages/outer-wall.js','js/stages/wine-cellar.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+const boss=new Game.CellarEncounter({floorY:660,width:1280});boss.random=()=>0.5;boss.animations={liedown:{},rise:{}};
+const fighter=new Game.Fighter(Game.Characters.rubania,{x:500,y:490});fighter.attackT=30;fighter.attackKind='stand';
+for(let i=0;i<18;i++)boss.update(fighter);
+const enemy=boss.slimes[0];assert.equal(boss.phase,'liedown');assert.equal(enemy.h,85);assert.equal(enemy.y+enemy.h,660);
+assert(!Game.aabb(fighter.whipAttackBox(),enemy),'standing whip passes over prone body');
+fighter.attackKind='air';assert(!Game.aabb(fighter.whipAttackBox(),enemy));
+fighter.attackKind='crouch';fighter.setHeight(85);assert(Game.aabb(fighter.whipAttackBox(),enemy),'low attack can still hit');
+const hp=enemy.hp;Game.damageEnemy(enemy,10,fighter);assert.equal(enemy.hp,hp-10,'prone boss is not invulnerable');
+fighter.attackT=0;for(let i=0;i<23;i++)boss.update(fighter);assert.equal(boss.phase,'liedown');
+boss.update(fighter);assert.equal(boss.phase,'rise');for(let i=0;i<32;i++)boss.update(fighter);
+assert.equal(boss.phase,'idle');assert.equal(enemy.h,195);assert.equal(enemy.y,465);
+boss.phase='aim';fighter.attackT=30;fighter.attackKind='stand';boss.update(fighter);assert.equal(boss.phase,'aim','no ducking during attack');
+boss.phase='idle';boss.world.timeStopped=true;boss.update(fighter);assert.equal(boss.phase,'idle');
+console.log('PASS: idle duck response, reduced real hitbox, low attack damage, safe rise, attack commitment and time stop.');

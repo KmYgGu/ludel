@@ -1,0 +1,13 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const p of ['js/core.js','js/physics.js','js/character.js','js/characters/rubania.js','js/bosses/slime.js','js/stages/outer-wall.js','js/stages/wine-cellar.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+const world={floorY:660,width:1280};const boss=new Game.CellarEncounter(world);boss.random=()=>0.5;
+boss.animations={liedown:{},rise:{},lieaim:{},lieshoot:{}};
+const f=new Game.Fighter(Game.Characters.rubania,{x:80,y:490});f.attackT=100;f.attackKind='stand';
+boss.update(f);assert.equal(boss.phase,'idle','out-of-range attack does not trigger duck');
+f.x=1100;f.facing=1;boss.update(f);assert.equal(boss.phase,'idle','attacking away does not trigger duck');
+f.x=500;f.y=100;boss.update(f);assert.equal(boss.phase,'idle','attack passing above is safe');
+f.y=490;f.attackT=30;for(let i=0;i<24;i++)boss.update(f);assert.equal(boss.phase,'lieaim');assert.equal(boss.slimes[0].h,85);
+for(let i=0;i<32;i++)boss.update(f);assert.equal(boss.phase,'lieshoot');assert.equal(boss.bullets.length,1);
+assert.equal(boss.bullets[0].y,613);assert.equal(Math.abs(boss.bullets[0].vx),40);
+f.attackT=0;for(let i=0;i<24;i++)boss.update(f);assert.equal(boss.phase,'rise');
+console.log('PASS: range/direction/height threat checks, prone preparation, low fast shot and safe rise.');

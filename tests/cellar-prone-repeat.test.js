@@ -1,0 +1,12 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const p of ['js/core.js','js/physics.js','js/character.js','js/characters/rubania.js','js/bosses/slime.js','js/stages/outer-wall.js','js/stages/wine-cellar.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+const boss=new Game.CellarEncounter({floorY:660,width:1280}),f=new Game.Fighter(Game.Characters.rubania,{x:500,y:490});
+boss.animations={liedown:{},lieaim:{},lieshoot:{},rise:{}};boss.random=()=>0;boss.cooldown=1;boss.update(f);assert.equal(boss.phase,'liedown');assert.equal(boss.proneShots,2);
+for(let i=0;i<17+32;i++)boss.update(f);assert.equal(boss.phase,'lieshoot');assert.equal(boss.ammo,5);
+for(let i=0;i<24;i++)boss.update(f);assert.equal(boss.phase,'lieshoot');assert.equal(boss.phaseTick,0);assert.equal(boss.ammo,4);
+for(let i=0;i<24;i++)boss.update(f);assert.equal(boss.phase,'rise');
+boss.phase='lieshoot';boss.phaseTick=0;boss.ammo=2;boss.proneShots=0;f.attackT=100;f.attackKind='stand';
+for(let i=0;i<24;i++)boss.update(f);assert.equal(boss.phase,'lieshoot');assert.equal(boss.ammo,1);
+for(let i=0;i<24;i++)boss.update(f);assert.equal(boss.phase,'lieshoot');assert.equal(boss.ammo,0);
+for(let i=0;i<24;i++)boss.update(f);assert.equal(boss.phase,'rise');
+console.log('PASS: voluntary prone attack, single preparation, repeated shot cycles and empty-cylinder exit.');

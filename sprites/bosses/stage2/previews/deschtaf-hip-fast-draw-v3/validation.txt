@@ -1,0 +1,5 @@
+Frame 1: canvas 1536x1440; character height 1206; feet y=1320; bounds (252, 114, 942, 1320); 23 permitted colors.
+Frame 2: canvas 1536x1440; character height 1206; feet y=1320; bounds (252, 114, 942, 1320); 23 permitted colors.
+Frame 3: canvas 1536x1440; character height 1206; feet y=1320; bounds (252, 114, 936, 1320); 23 permitted colors.
+Frame 4: canvas 1536x1440; character height 1206; feet y=1320; bounds (246, 114, 936, 1320); 23 permitted colors.
+Frame 5: canvas 1536x1440; character height 1206; feet y=1320; bounds (252, 114, 936, 1320); 22 permitted colors.

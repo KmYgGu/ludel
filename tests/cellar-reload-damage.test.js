@@ -1,0 +1,13 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const p of ['js/core.js','js/physics.js','js/character.js','js/characters/rubania.js','js/bosses/slime.js','js/stages/outer-wall.js','js/stages/wine-cellar.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+const boss=new Game.CellarEncounter({floorY:660,width:1280}),f=new Game.Fighter(Game.Characters.rubania,{x:500,y:490});
+boss.image={};const damage={};boss.animations={reload:{source:{},cell:186,height:186,scale:1},damage:{source:damage,cell:127,height:203,scale:1},liedown:{}};
+boss.ammo=0;boss.startReload();boss.phaseTick=35;f.attackT=100;f.attackKind='stand';Game.damageEnemy(boss.slimes[0],10,f);
+assert.equal(boss.slimes[0].hp,790);assert.equal(boss.phase,'reload');assert.equal(boss.phaseTick,35);assert.equal(boss.reloadDamageTicks,36);
+boss.update(f);assert.equal(boss.ammo,1);assert.equal(boss.phase,'reload','reachable attack cannot interrupt reload');
+const images=[],labels=[];const ctx=new Proxy({}, {get:(_,key)=>key==='drawImage'?(...a)=>images.push(a[0]):key==='fillText'?(label)=>labels.push(label):()=>{},set:()=>true});
+boss.draw(ctx);assert.equal(images.at(-1),damage);assert.equal(labels.length,0);
+Game.debug=true;boss.draw(ctx);assert(labels.includes('탄약 1 / 6'));
+const tick=boss.phaseTick,reaction=boss.reloadDamageTicks;boss.world.timeStopped=true;boss.update(f);assert.equal(boss.phaseTick,tick);assert.equal(boss.reloadDamageTicks,reaction);
+boss.world.timeStopped=false;for(let i=0;i<36;i++)boss.update(f);assert.equal(boss.reloadDamageTicks,0);assert.equal(boss.phase,'idle');assert.equal(boss.reloadBlocked,true);boss.draw(ctx);assert.notEqual(images.at(-1),damage);
+console.log('PASS: reload damage pose, uninterrupted ammo progress, no dodge, time stop and debug-only ammo label.');

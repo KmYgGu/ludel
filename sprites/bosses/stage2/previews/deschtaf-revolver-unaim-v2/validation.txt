@@ -1,0 +1,4 @@
+Frame 1: canvas 2040x1920; character height 1512; feet y=1752; bounds (342, 240, 1542, 1752); 24 permitted colors.
+Frame 2: canvas 2040x1920; character height 1512; feet y=1752; bounds (330, 240, 1440, 1752); 24 permitted colors.
+Frame 3: canvas 2040x1920; character height 1512; feet y=1752; bounds (348, 240, 1254, 1752); 24 permitted colors.
+Frame 4: canvas 2040x1920; character height 1512; feet y=1752; bounds (348, 240, 1242, 1752); 24 permitted colors.

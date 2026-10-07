@@ -1,0 +1,12 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+global.window=global;vm.runInThisContext(fs.readFileSync('js/core.js','utf8'));
+assert(Game.beginStageIntro('outerWall','外壁','Slime'));
+assert.equal(Game.stageIntro.opacity,0);
+Game.advanceStageIntro(500);assert.equal(Game.stageIntro.opacity,.5);
+Game.advanceStageIntro(500);assert.equal(Game.stageIntro.opacity,1);
+Game.advanceStageIntro(2500);assert.equal(Game.stageIntro.opacity,1);
+Game.advanceStageIntro(500);assert.equal(Game.stageIntro.opacity,.5);
+Game.advanceStageIntro(500);assert.equal(Game.stageIntro,null);
+assert.equal(Game.beginStageIntro('outerWall','外壁','Slime'),false);
+assert(Game.beginStageIntro('other','Other','Boss'));
+console.log('PASS: fade in, reading hold, fade out, once per stage per page load.');

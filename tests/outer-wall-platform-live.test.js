@@ -1,0 +1,22 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const file of ['js/core.js','js/physics.js','js/input.js','js/character.js','js/characters/rubania.js','js/bosses/slime.js','js/stages/outer-wall.js','js/hud.js'])vm.runInThisContext(fs.readFileSync(file,'utf8'));
+Game.Input.prototype.bind=function(){};
+let fighter;Game.Fighter.prototype.load=function(){fighter=this;return Promise.resolve();};
+Game.loadImage=()=>Promise.resolve(null);
+const ctx=new Proxy({}, {get:()=>()=>{},set:()=>true});
+global.document={getElementById:()=>({getContext:()=>ctx,addEventListener(){},focus(){}})};
+let frame;global.requestAnimationFrame=callback=>frame=callback;
+let world;const states=new Set(),angles=[];
+const update=Game.updateOuterWallPlatforms;
+Game.updateOuterWallPlatforms=function(w,f,slimes){world=w;update(w,f,slimes);const p=w.solids.find(s=>s.crumbling);states.add(p.state);angles.push(p.angle);};
+vm.runInThisContext(fs.readFileSync('js/game.js','utf8'));
+setImmediate(()=>{
+  fighter.x=600;fighter.y=550-fighter.h;fighter.invuln=10000;
+  for(let i=1;i<=300;i++)frame(i*1000/60);
+  assert(world,'actual game loop updates stage one platform');
+  for(const state of ['warning','falling','waiting','rising','ready'])assert(states.has(state),state);
+  assert(angles.some(a=>a>0)&&angles.some(a=>a<0),'both rotation directions render');
+  const p=world.solids.find(s=>s.crumbling);assert.equal(p.y,550);assert(!p.disabled);
+  assert.equal(fighter.y+fighter.h,660,'player drops to floor when platform collapses');
+  console.log('PASS: actual stage-one game loop triggers rotation, collapse and regeneration.');
+});

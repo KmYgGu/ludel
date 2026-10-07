@@ -1,0 +1,15 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const p of ['js/core.js','js/character.js','js/characters/rubania.js','js/shop-system.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+const actor=new Game.Fighter(JSON.parse(JSON.stringify(Game.Characters.rubania)),{x:80,y:490});
+assert.equal(actor.lives,3);
+const s=new Game.ShopSession(actor,10000);
+assert.equal(s.price('heal'),50);actor.hp=10;s.buy('heal');assert.equal(s.price('heal'),73);
+assert.equal(s.price('cross'),s.price('axe'));
+const before=s.points;s.buy('knife');assert.equal(s.points,before);assert.equal(actor.weaponPurchases,0);
+s.buy('cross');assert(actor.ownedSubweapons.has('cross'));assert.equal(s.price('axe'),400);assert.equal(s.price('holy'),400);
+const duplicate=s.points;assert(s.buy('cross').includes('이미'));assert.equal(s.points,duplicate);
+s.buy('life');assert.equal(actor.lives,4);
+assert(Game.consumeLife(actor));assert.equal(actor.lives,3);
+assert(Game.consumeLife(actor));assert(Game.consumeLife(actor));assert(!Game.consumeLife(actor));assert.equal(actor.lives,0);
+const reopened=new Game.ShopSession(actor,1000);assert.equal(reopened.price('heal'),73);assert.equal(reopened.price('clock'),400);
+console.log('PASS: cheap/increasing healing, common weapon price increments, duplicate cancellation, lives purchase/exhaustion and persistent purchase counts.');

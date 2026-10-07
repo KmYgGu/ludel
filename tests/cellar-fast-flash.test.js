@@ -1,0 +1,10 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const p of ['js/core.js','js/physics.js','js/character.js','js/characters/rubania.js','js/bosses/slime.js','js/stages/outer-wall.js','js/stages/wine-cellar.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+const b=new Game.CellarEncounter({width:960,floorY:660}),f=new Game.Fighter(Game.Characters.rubania,{x:80,y:490});
+assert.equal(b.slimes[0].x,780);assert(b.slimes[0].x+b.slimes[0].w<=960);
+b.animations={gunready:{}};b.phase='fastlock';b.phaseTick=7;b.lockedTarget={x:70,y:450,w:110,h:210};
+b.update(f);assert.equal(b.fastFlash,10);assert.equal(b.phase,'fastshoot1');
+b.world.timeStopped=true;b.update(f);assert.equal(b.fastFlash,10);b.world.timeStopped=false;
+for(let i=0;i<10;i++)b.update(f);assert.equal(b.fastFlash,0);
+b.phase='aim';b.phaseTick=19;b.update(f);assert.equal(b.fastFlash,0,'ordinary shots do not trigger a fast-shot flash');
+console.log('PASS: compact boss spawn, fast-shot flash, brief decay, time stop and ordinary-shot isolation.');

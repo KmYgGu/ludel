@@ -1,0 +1,14 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const p of ['js/core.js','js/physics.js','js/character.js','js/characters/rubania.js','js/hud.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+const f=new Game.Fighter(Game.Characters.rubania,{x:720,y:490});f.takeHit({x:900,y:500,w:20,h:20,damage:18});assert.equal(f.hp,82);assert.equal(f.damageFeedback.length,1);assert.equal(f.damageFeedback[0].amount,18);f.takeHit({x:900,y:500,w:20,h:20,damage:18});assert.equal(f.damageFeedback.length,1,'blocked hits produce no feedback');
+let style,rects=[],texts=[],circles=[];const ctx=new Proxy({}, {get:(_,key)=>key==='fillText'?(...a)=>texts.push(a):key==='fillRect'?(...a)=>rects.push({style,args:a}):key==='arc'?(...a)=>circles.push(a):()=>{},set:(_,key,value)=>{if(key==='fillStyle')style=value;return true}});
+Game.Hud.player(ctx,f);assert(rects.some(r=>r.style==='#862f45'&&r.args[2]===210),'red health stays full before arrival');assert(texts.some(t=>t[0]==='체력  100 / 100'));texts=[];
+Game.Hud.updateDamage(f,48,640);Game.Hud.drawDamage(ctx,f,640);assert(texts.some(t=>t[0]==='18'));assert.equal(circles.length,0);assert.equal(f.damageWhiteSegments.length,0);
+f.x+=100;Game.Hud.updateDamage(f,12,700);const effect=f.damageFeedback[0];assert.equal(effect.startX,effect.x-700);Game.Hud.drawDamage(ctx,f,700);assert(circles.length>0);
+rects=[];Game.Hud.player(ctx,f);assert(rects.some(r=>r.style==='#862f45'&&r.args[2]===210),'red health stays full during flight');
+Game.Hud.updateDamage(f,32,700);assert.equal(f.damageFeedback.length,0);assert.deepEqual(f.damageWhiteSegments[0],{from:82,to:100,age:0});
+function whiteWidth(){rects=[];Game.Hud.player(ctx,f);return rects.filter(r=>r.style==='#f8f4e9').reduce((sum,r)=>sum+r.args[2],0);}
+assert(Math.abs(whiteWidth()-37.8)<0.001);assert(rects.some(r=>r.style==='#862f45'&&r.args[2]===172),'red health changes only when the orb arrives');Game.Hud.updateDamage(f,18,700);assert(Math.abs(whiteWidth()-37.8)<0.001);Game.Hud.updateDamage(f,30,700);assert(Math.abs(whiteWidth()-18.9)<0.001);Game.Hud.updateDamage(f,30,700);assert.equal(whiteWidth(),0);
+f.invuln=0;f.takeHit({x:900,y:500,w:20,h:20,damage:10});f.invuln=0;f.takeHit({x:900,y:500,w:20,h:20,damage:12});assert.equal(f.damageFeedback.length,2);Game.Hud.updateDamage(f,92,700);assert.equal(f.damageWhiteSegments.length,1);assert.deepEqual(f.damageWhiteSegments[0],{from:60,to:82,age:0});f.hp=100;assert.equal(whiteWidth(),0,'healing cannot paint white over restored health');
+const dead=new Game.Fighter(Game.Characters.rubania,{x:720,y:490});dead.hp=5;dead.takeHit({x:900,y:500,w:20,h:20,damage:18});assert.equal(dead.damageFeedback[0].amount,5);Game.Hud.updateDamage(dead,92,640);assert.equal(dead.damageWhiteSegments[0].from,0);
+console.log('PASS: actual damage, reading pause, player tracking, screen-space flight, proportional white shrink, stacked hits, healing and fatal damage.');

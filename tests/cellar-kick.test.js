@@ -1,0 +1,12 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const p of ['js/core.js','js/physics.js','js/character.js','js/characters/rubania.js','js/bosses/slime.js','js/stages/outer-wall.js','js/stages/wine-cellar.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+const boss=new Game.CellarEncounter({floorY:660,width:1280}),actor=boss.slimes[0];
+const f=new Game.Fighter(Game.Characters.rubania,{x:850,y:390});
+f.kicking=true;f.kickDir=1;f.kickHit={x:930,y:500,w:40,h:30};boss.resolveContact(f);
+assert.equal(actor.hp,795);assert.equal(f.kicking,false);assert.equal(f.vy,f.def.stats.jumpV);assert(f.kickInvuln>0);assert.equal(f.grounded,false);
+boss.resolveContact(f);assert.equal(actor.hp,795,'one kick connects only once');
+const hp=f.hp;f.takeHit({x:930,y:500,w:16,h:6,damage:18});assert.equal(f.hp,hp,'successful kick protection also stops bullets');
+f.kickInvuln=0;actor.h=85;actor.y=575;f.kicking=true;f.kickHit={x:930,y:500,w:40,h:30};boss.resolveContact(f);assert.equal(actor.hp,795);assert.equal(f.kicking,true);assert.equal(f.kickInvuln,0);
+f.takeHit({x:930,y:500,w:16,h:6,damage:18});assert.equal(f.hp,hp-18,'a missed kick provides no protection');
+f.kickHit={x:930,y:600,w:40,h:30};boss.resolveContact(f);assert.equal(actor.hp,790,'prone boss remains vulnerable to a kick that reaches it');
+console.log('PASS: cellar kick damage, single hit, bounce, brief protection, prone hitbox and unprotected miss.');

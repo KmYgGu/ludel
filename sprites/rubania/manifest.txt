@@ -1,0 +1,19 @@
+rubania sprites from idle.mp4 / walk.mp4 / bend.mp4 / jump.mp4
+source 24fps 464x640, harvested at 12fps, then selected
+cell 464x640 px, black keyable background, crop (0,0)-(464,640)
+playback about 12 fps
+
+idle: 8 frames, loop, blink + small sway
+  00=f001 01=f006 02=f007 03=f008 04=f009 05=f010 06=f012 07=f016
+walk: 8 frames, loop, right-facing side walk cycle
+  00=f016 01=f017 02=f018 03=f019 04=f020 05=f021 06=f022 07=f023
+crouch: 7 frames, oneshot stand-to-kneel, last frame is hold
+  00=f013 01=f015 02=f016 03=f018 04=f020 05=f022 06=f025  (from bend.mp4)
+jump: 9 frames, oneshot crouch-antic / takeoff / air / fall
+  00=f019 01=f023 02=f027 03=f030 04=f033 05=f036 06=f040 07=f044 08=f047
+  note: clip has no clear landing pose
+
+run: 8 frames, loop, right-facing run cycle from run.mp4
+  00=f022 01=f023 02=f024 03=f025 04=f026 05=f027 06=f028 07=f029
+backstep: 7 frames, oneshot dodge from Backstep Evasion.mp4
+  00=f008 01=f011 02=f014 03=f017 04=f020 05=f023 06=f026

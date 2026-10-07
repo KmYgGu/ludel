@@ -1,0 +1,2 @@
+from pathlib import Path
+p=Path('js/shop.js');s=p.read_text(encoding='utf-8');s=s.replace("{ name: '나이프'","{ id:'knife', name: '나이프'").replace("{ name: '십자가'","{ id:'cross', name: '십자가'").replace("{ name: '도끼'","{ id:'axe', name: '도끼'").replace("{ name: '성수'","{ id:'holy', name: '성수'").replace("{ name: '회중시계'","{ id:'clock', name: '회중시계'");s=s.replace("{ id:'info', price:150", "{ id:'life', name:'잔기 구매', kind:'재도전 기회', icon:'✧', speech:'다시 일어설 기회를 하나 더 준비해 줄게.' },\n      { id:'info', price:150");p.write_text(s,encoding='utf-8')

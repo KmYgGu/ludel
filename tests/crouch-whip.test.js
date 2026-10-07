@@ -1,0 +1,17 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+global.window=global;
+for(const path of ['js/core.js','js/sprite-fit.js','js/character.js','js/characters/rubania.js']) vm.runInThisContext(fs.readFileSync(path,'utf8'));
+const f=new Game.Fighter(Game.Characters.rubania,{x:200,y:500});
+f.attackKind='crouch'; f.attackT=10;
+f.facing=1;
+const right=f.whipAttackBox();
+assert.equal(right.w,420);assert.equal(right.h,64);
+const cx=f.x+f.w/2;
+f.facing=-1;const left=f.whipAttackBox();
+assert.equal(left.x,2*cx-right.x-right.w);assert.equal(left.y,right.y);
+f.facing=1;f.attackHit=right;
+const hit={x:right.x+right.w-5,y:right.y+10,w:5,h:5,hp:100};
+const miss={x:right.x,y:right.y-20,w:5,h:5,hp:100};
+f.applyWeaponDamage({enemies:[hit,miss]});assert.equal(hit.hp,80);assert.equal(miss.hp,100);
+f.applyWeaponDamage({enemies:[hit,miss]});assert.equal(hit.hp,80);
+console.log('PASS: generous rectangle, left/right mirror, inside/outside hits and once-per-swing damage.');

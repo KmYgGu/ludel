@@ -1,0 +1,11 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
+for(const p of ['js/core.js','js/physics.js','js/character.js','js/characters/rubania.js','js/shop-system.js'])vm.runInThisContext(fs.readFileSync(p,'utf8'));
+const actor=new Game.Fighter(JSON.parse(JSON.stringify(Game.Characters.rubania)),{x:80,y:490});actor.hp=67;actor.mp=100;actor.lives=3;
+const checkpoint=Game.captureShopCheckpoint(actor,4000,new Set([2]));
+const session=new Game.ShopSession(actor,4000);session.buy('maxHp');session.buy('maxMp');session.buy('cross');session.buy('heal');
+actor.knowsCellarBoss=true;actor.hp=0;checkpoint.deaths=1;Game.restoreShopCheckpoint(actor,checkpoint);
+assert.equal(actor.hp,67);assert.equal(actor.lives,2);assert.equal(actor.maxHp,checkpoint.maxHp);assert.equal(actor.maxMp,checkpoint.maxMp);
+assert.equal(actor.def.stats.maxHp,checkpoint.def.stats.maxHp);assert(!actor.ownedSubweapons.has('cross'));assert.equal(actor.healPurchases,0);assert.equal(actor.weaponPurchases,0);assert.equal(actor.knowsCellarBoss,checkpoint.knowsCellarBoss);assert.equal(checkpoint.points,4000);assert.deepEqual(checkpoint.learned,[2]);
+actor.def.stats.whipDamage=999;assert.notEqual(checkpoint.def.stats.whipDamage,999,'checkpoint has no mutable references');
+checkpoint.deaths=2;Game.restoreShopCheckpoint(actor,checkpoint);assert.equal(actor.lives,1,'repeated rollback never refunds deaths');
+console.log('PASS: pre-purchase stats, HP/MP, inventory, purchase counters, knowledge, points and consumed-life preservation.');
