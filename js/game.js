@@ -227,7 +227,7 @@
     document.getElementById('death-message').textContent = canRetry ? '남은 잔기 ' + fighter.lives + ' · 같은 스테이지에서 다시 시작합니다.' : '모든 잔기를 소모했습니다.';
     document.getElementById('retry-stage').hidden = !canRetry;
     document.getElementById('return-shop').hidden = !canReturnShop;
-    document.getElementById('new-game').hidden = canRetry;
+    document.getElementById('new-game').hidden = false;
     document.getElementById(canRetry ? 'retry-stage' : 'new-game').focus();
   }
   document.getElementById('retry-stage').addEventListener('click', function () {
