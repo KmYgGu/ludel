@@ -1,5 +1,6 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
 const events={};global.addEventListener=(type,f)=>(events[type]||=[]).push(f);
+global.matchMedia=()=>({matches:true});
 const nodes=new Map();const ctx=new Proxy({}, {get:()=>()=>{},set:()=>true});
 global.document={hidden:false,addEventListener:global.addEventListener,getElementById(id){if(!nodes.has(id))nodes.set(id,{hidden:true,events:{},focus(){},getContext:()=>ctx,addEventListener(type,f){(this.events[type]||=[]).push(f)}});return nodes.get(id)}};
 function emit(type,e={}){for(const f of events[type]||[])f(e)}
@@ -23,5 +24,14 @@ setImmediate(()=>{
   click('resume-game');assert(!Game.paused);assert(document.getElementById('pause-screen').hidden);
   frame(120010);assert.equal(updates,count,'background elapsed time discarded');frame(120030);assert(updates<=count+2&&updates>count);
   emit('pagehide');assert(Game.paused);
+  click('resume-game');emit('freeze');assert(Game.paused);click('resume-game');emit('resume');assert(Game.paused);
+  click('resume-game');emit('pageshow',{persisted:true});assert(Game.paused);
+  click('resume-game');emit('pointercancel');assert(Game.paused);
+  click('resume-game');emit('touchcancel');assert(Game.paused);
+  click('resume-game');emit('pointerdown',{pointerId:1,clientY:10});emit('pointermove',{pointerId:1,clientY:70});assert(Game.paused,'notification pull-down observed near top pauses');
+  click('resume-game');frame(121000);const frozenTime=world.timer.remainingFrames;
+  frame(123000);assert(Game.paused,'silent suspension detected before advancing game');assert.equal(world.timer.remainingFrames,frozenTime);
+  click('resume-game');frame(123010);assert(!Game.paused,'resuming clears gap detector');
   console.log('PASS: actual game pauses on blur/hidden/pagehide, freezes timer, resets inputs and resumes without time jump.');
+  console.log('PASS: freeze/resume, cached return, OS touch cancellation, notification gesture and silent suspension.');
 });

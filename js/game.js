@@ -293,6 +293,7 @@
     ctx.restore();
   }
   function loop(t) {
+    if(Game.checkPause)Game.checkPause(t);
     if(Game.paused){last=t;feedbackLast=t;acc=0;requestAnimationFrame(loop);return;}
     const feedbackTicks=feedbackLast==null?0:Math.min(100,Math.max(0,t-feedbackLast))*60/1000;
     feedbackLast=t;
