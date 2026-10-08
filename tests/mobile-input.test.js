@@ -39,3 +39,13 @@ setImmediate(async()=>{
   console.log('PASS: portrait lock fullscreen retry, safe rejection, rotated input and relocated timer.');
 });
 console.log('PASS: touch multitouch, diagonals, cancellation, mirrored saved layout, overlay and desktop blocking.');
+const pulses=[];let now=1000;const originalNow=Date.now;Date.now=()=>now;
+window.navigator.vibrate=duration=>pulses.push(duration);
+Game.mobileHaptic();Game.mobileHaptic();assert.deepEqual(pulses,[8],'brief vibration is throttled');
+now+=50;send('mobile-attack','pointerdown',11);assert.equal(pulses.length,2);send('mobile-attack','pointerup',11);
+now+=50;send('mobile-stick','pointerdown',12,100,30);assert.equal(pulses.length,3);
+now+=50;send('mobile-stick','pointermove',12,100,25);assert.equal(pulses.length,3,'holding same direction does not vibrate continuously');
+send('mobile-stick','pointermove',12,170,100);assert.equal(pulses.length,4,'new vertical direction also vibrates');
+send('mobile-stick','pointerup',12);assert.equal(pulses.length,4,'releasing does not vibrate');
+delete window.navigator.vibrate;now+=50;Game.mobileHaptic();Date.now=originalNow;
+console.log('PASS: 8ms haptics on action and changed joystick direction, rate limiting and unsupported devices.');

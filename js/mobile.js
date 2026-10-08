@@ -2,6 +2,17 @@
   const media=window.matchMedia('(pointer:coarse) and (max-width:900px), (pointer:coarse) and (orientation:landscape) and (max-height:600px)');
   const root=document.getElementById('mobile-controls');
   const setting=document.getElementById('reverse-mobile-controls');
+  let lastHaptic=-Infinity;
+  Game.mobileHaptic=function(){
+    if(!media.matches || !window.navigator || typeof window.navigator.vibrate!=='function')return;
+    const now=Date.now();
+    if(now-lastHaptic<45)return;
+    try { window.navigator.vibrate(8); lastHaptic=now; } catch (_) {}
+  };
+  document.addEventListener('pointerdown',function(event){
+    const control=event.target.closest && event.target.closest('button, input[type="checkbox"]');
+    if(control && !control.id.startsWith('mobile-'))Game.mobileHaptic();
+  },true);
   const screenRoot=document.querySelector('.screen');
   function syncOrientation(){
     const angle=window.screen && window.screen.orientation ? window.screen.orientation.angle : window.orientation;
@@ -32,10 +43,13 @@
     let stickPointer=null,enabled=false;
     const held=new Map();
     function playable(){return media.matches && !(Game.menu&&Game.menu.active) && !Game.stageIntro && !Game.clearSequence && !Game.deathState && !(Game.shop&&Game.shop.active);}
-    function direction(x,y){
+    function direction(x,y,feedback){
       const old=input.axisX();
+      const oldY=(input.down?1:0)-(input.up?1:0);
       input.left=x < -0.25;input.right=x > 0.25;input.up=y < -0.25;input.down=y > 0.25;
       const next=input.axisX();
+      const nextY=(input.down?1:0)-(input.up?1:0);
+      if(feedback && (next!==old || nextY!==oldY) && (next || nextY))Game.mobileHaptic();
       if(next!==old){input.tap.released=true;if(next)input.tryRunTap(next,fighter);}
     }
     function moveStick(event){
@@ -46,7 +60,7 @@
       const rotation=rotated?(angle===270?Math.PI/2:-Math.PI/2):0;
       let x=(dx*Math.cos(rotation)+dy*Math.sin(rotation))/radius,y=(-dx*Math.sin(rotation)+dy*Math.cos(rotation))/radius;
       const length=Math.hypot(x,y);if(length>1){x/=length;y/=length;}
-      direction(x,y);knob.style.transform='translate('+x*radius+'px,'+y*radius+'px)';
+      direction(x,y,true);knob.style.transform='translate('+x*radius+'px,'+y*radius+'px)';
     }
     stick.addEventListener('pointerdown',function(e){if(!playable()||stickPointer!==null)return;e.preventDefault();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);moveStick(e);});
     stick.addEventListener('pointermove',function(e){if(e.pointerId===stickPointer){e.preventDefault();moveStick(e);}});
@@ -54,7 +68,7 @@
     ['pointerup','pointercancel','lostpointercapture'].forEach(type=>stick.addEventListener(type,releaseStick));
     function action(id,key,edge){
       const button=document.getElementById(id);
-      button.addEventListener('pointerdown',function(e){if(!playable())return;e.preventDefault();button.setPointerCapture(e.pointerId);held.set(e.pointerId,{button,key});if(key)input[key]=true;input[edge]=true;button.classList.add('pressed');});
+      button.addEventListener('pointerdown',function(e){if(!playable())return;e.preventDefault();Game.mobileHaptic();button.setPointerCapture(e.pointerId);held.set(e.pointerId,{button,key});if(key)input[key]=true;input[edge]=true;button.classList.add('pressed');});
       function release(e){const item=held.get(e.pointerId);if(!item||item.button!==button)return;held.delete(e.pointerId);if(key)input[key]=Array.from(held.values()).some(h=>h.key===key);if(!Array.from(held.values()).some(h=>h.button===button))button.classList.remove('pressed');}
       ['pointerup','pointercancel','lostpointercapture'].forEach(type=>button.addEventListener(type,release));
       button.addEventListener('contextmenu',e=>e.preventDefault());
