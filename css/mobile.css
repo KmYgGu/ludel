@@ -1,4 +1,8 @@
 .menu-panel .mobile-setting, #mobile-controls { display:none; }
+#pause-screen { position:absolute; inset:0; z-index:30; display:flex; align-items:center; justify-content:center; background:#100c17d9; }
+#pause-screen[hidden] { display:none; }
+#pause-screen p { margin:0 0 22px; color:#c9bdcb; }
+#resume-game { min-height:48px; width:100%; }
 @media (pointer:coarse) and (max-width:900px), (pointer:coarse) and (orientation:landscape) and (max-height:600px) {
   html, body { width:100%; height:100%; overflow:hidden; overscroll-behavior:none; }
   body > p { display:none !important; }

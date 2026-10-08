@@ -56,7 +56,7 @@ Game.Input.prototype.bind = function (fighter) {
   const input = this;
   if (Game.bindMobileInput) Game.bindMobileInput(input, fighter);
   window.addEventListener("keydown", function (e) {
-    if ((Game.menu && Game.menu.active) || Game.stageIntro || Game.clearSequence || Game.deathState || (Game.shop && Game.shop.active)) return;
+    if (Game.paused || (Game.menu && Game.menu.active) || Game.stageIntro || Game.clearSequence || Game.deathState || (Game.shop && Game.shop.active)) return;
     if (e.code === "ArrowLeft" || e.code === "KeyA") {
       if (!input.left) input.tryRunTap(-1, fighter);
       input.left = true;

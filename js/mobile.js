@@ -42,7 +42,7 @@
     const stick=document.getElementById('mobile-stick'),knob=document.getElementById('mobile-stick-knob');
     let stickPointer=null,enabled=false;
     const held=new Map();
-    function playable(){return media.matches && !(Game.menu&&Game.menu.active) && !Game.stageIntro && !Game.clearSequence && !Game.deathState && !(Game.shop&&Game.shop.active);}
+    function playable(){return media.matches && !Game.paused && !(Game.menu&&Game.menu.active) && !Game.stageIntro && !Game.clearSequence && !Game.deathState && !(Game.shop&&Game.shop.active);}
     function direction(x,y,feedback){
       const old=input.axisX();
       const oldY=(input.down?1:0)-(input.up?1:0);
@@ -78,6 +78,7 @@
     action('mobile-subweapon',null,'subweaponPressed');
     action('mobile-dodge',null,'backstepPressed');
     function reset(){releaseStick();held.forEach(h=>h.button.classList.remove('pressed'));held.clear();input.jump=false;input.attack=false;input.clearEdges();}
+    Game.resetMobileInput=reset;
     window.addEventListener('blur',reset);
     document.addEventListener('visibilitychange',function(){if(document.hidden)reset();});
     setting.addEventListener('change',reset);

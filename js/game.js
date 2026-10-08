@@ -38,10 +38,16 @@
   const input = new Game.Input();
   const fighter = new Game.Fighter(JSON.parse(JSON.stringify(Game.Characters.rubania)), { x: 80, y: WORLD.floorY - Game.Characters.rubania.stats.standH });
   input.bind(fighter);
+  if(Game.bindPause)Game.bindPause(function(){
+    return !(Game.menu&&Game.menu.active) && !Game.deathState && !(Game.shop&&Game.shop.active);
+  },function(){
+    if(Game.resetMobileInput)Game.resetMobileInput();
+    Object.assign(input,new Game.Input());last=0;feedbackLast=null;acc=0;
+  });
   canvas.addEventListener('mousedown', function (event) {
     if (event.button !== 1) return;
     event.preventDefault();
-    if ((Game.menu && Game.menu.active) || Game.stageIntro || Game.clearSequence || (Game.shop && Game.shop.active) || (fighter.hp <= 0 && !fighter.allowZeroHp)) return;
+    if (Game.paused || (Game.menu && Game.menu.active) || Game.stageIntro || Game.clearSequence || (Game.shop && Game.shop.active) || (fighter.hp <= 0 && !fighter.allowZeroHp)) return;
     encounter.slimes.forEach(function (slime) { slime.hp = 0; });
     encounter.waves = [];
   });
@@ -287,6 +293,7 @@
     ctx.restore();
   }
   function loop(t) {
+    if(Game.paused){last=t;feedbackLast=t;acc=0;requestAnimationFrame(loop);return;}
     const feedbackTicks=feedbackLast==null?0:Math.min(100,Math.max(0,t-feedbackLast))*60/1000;
     feedbackLast=t;
     Game.Hud.updateDamage(fighter,feedbackTicks,camera.x);
