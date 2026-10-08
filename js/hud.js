@@ -1,4 +1,10 @@
 Game.Hud = {
+  playerLayout: function (overrideScale) {
+    const scale=overrideScale==null?(Game.mobileHudScale?Game.mobileHudScale():1):overrideScale;
+    return scale>1 ? {x:12*scale,width:1280*0.29,hpText:18*scale,hpY:23*scale,hpH:6*scale,
+      mpText:45*scale,mpY:50*scale,mpH:5*scale,equipmentY:69*scale,livesX:150*scale,font:14*scale}
+      : {x:25,width:210,hpText:24,hpY:33,hpH:14,mpText:69,mpY:78,mpH:10,equipmentY:111,livesX:150,font:12};
+  },
   updateBossDamage: function(encounter,ticks) {
     const hp=encounter.totalHp();
     if(!encounter.hpFeedback)encounter.hpFeedback={lastHp:hp,from:hp,to:hp,age:78};
@@ -34,7 +40,8 @@ Game.Hud = {
       ctx.save();
       const age=effect.age,morph=Game.clamp((age-48)/12,0,1);
       let x=effect.x-cameraX,y=effect.y-Math.min(age/48,1)*8;
-      const targetX=25+210*((effect.afterHp+effect.beforeHp)/2)/actor.maxHp,targetY=40;
+      const layout=this.playerLayout();
+      const targetX=layout.x+layout.width*((effect.afterHp+effect.beforeHp)/2)/actor.maxHp,targetY=layout.hpY+layout.hpH/2;
       if(age>=60){
         const t=Game.clamp((age-60)/32,0,1),ease=t*t*(3-2*t);
         x=effect.startX+(targetX-effect.startX)*ease;
@@ -65,32 +72,35 @@ Game.Hud = {
     ctx.fillRect(x + width + 3, y + height / 2 - 2, 4, 4);
   },
   player: function (ctx, actor) {
+    const l=this.playerLayout(ctx.canvas && ctx.canvas.width === 300 ? 1 : undefined);
     const pending=(actor.damageFeedback||[]).reduce((sum,effect)=>sum+effect.amount,0);
     const shownHp=Math.min(actor.maxHp,actor.hp+pending);
-    ctx.save(); ctx.font = '12px serif'; ctx.fillStyle = '#d7c8b2';
-    ctx.fillText('체력  ' + Math.ceil(shownHp) + ' / ' + actor.maxHp, 25, 24);
-    this.bar(ctx, 25, 33, 210, 14, shownHp / actor.maxHp, '#862f45', '#be5961');
+    ctx.save(); ctx.font = l.font+'px serif'; ctx.fillStyle = '#d7c8b2';
+    ctx.fillText(l.font>12?'체력 '+Math.ceil(shownHp)+'/'+actor.maxHp:'체력  '+Math.ceil(shownHp)+' / '+actor.maxHp, l.x, l.hpText);
+    this.bar(ctx, l.x, l.hpY, l.width, l.hpH, shownHp / actor.maxHp, '#862f45', '#be5961');
     ctx.fillStyle='#f8f4e9';
     for(const segment of actor.damageWhiteSegments||[]){
       const remaining=1-Game.clamp((segment.age-18)/60,0,1);
       const from=Math.max(shownHp,segment.from),to=Math.min(actor.maxHp,segment.from+(segment.to-segment.from)*remaining);
-      if(to>from)ctx.fillRect(25+210*from/actor.maxHp,33,210*(to-from)/actor.maxHp,14);
+      if(to>from)ctx.fillRect(l.x+l.width*from/actor.maxHp,l.hpY,l.width*(to-from)/actor.maxHp,l.hpH);
     }
-    ctx.fillStyle = '#c1b7cf'; ctx.fillText('마력  ' + Math.floor(actor.mp) + ' / ' + actor.maxMp, 25, 69);
-    this.bar(ctx, 25, 78, 210, 10, actor.mp / actor.maxMp, '#4f456f', '#8b7ca5');
+    ctx.fillStyle = '#c1b7cf'; ctx.fillText(l.font>12?'마력 '+Math.floor(actor.mp)+'/'+actor.maxMp:'마력  '+Math.floor(actor.mp)+' / '+actor.maxMp, l.x, l.mpText);
+    this.bar(ctx, l.x, l.mpY, l.width, l.mpH, actor.mp / actor.maxMp, '#4f456f', '#8b7ca5');
     const names = {knife:'나이프',cross:'십자가',axe:'도끼',holy:'성수',clock:'회중시계'};
-    ctx.fillStyle = '#bba98a'; ctx.fillText(names[actor.subweapon] || '', 25, 111);
-    ctx.fillText('잔기 × ' + (actor.lives == null ? 3 : actor.lives), 150, 111); ctx.restore();
+    ctx.fillStyle = '#bba98a'; ctx.fillText(names[actor.subweapon] || '', l.x, l.equipmentY);
+    ctx.fillText('잔기 × ' + (actor.lives == null ? 3 : actor.lives), l.livesX, l.equipmentY); ctx.restore();
   },
   boss: function (ctx, name, hp, maxHp, width, height, feedback) {
-    const w = this.bossWidth(maxHp, width), x = (width - w) / 2, y = height - 36;
-    ctx.save(); ctx.textAlign = 'center'; ctx.font = '16px serif'; ctx.fillStyle = '#d2bda7';
-    ctx.fillText(name + '  ' + Math.ceil(hp) + ' / ' + maxHp, width / 2, y - 15);
-    this.bar(ctx, x, y, w, 12, hp / maxHp, '#74293c', '#ab4b58');
+    const scale=Game.mobileHudScale?Game.mobileHudScale():1;
+    const w = scale>1?Math.min(width-24*scale,this.bossWidth(maxHp,width)*1.6):this.bossWidth(maxHp, width), x = (width - w) / 2, y = height - (scale>1?12*scale:36);
+    const barH=scale>1?5*scale:12;
+    ctx.save(); ctx.textAlign = 'center'; ctx.font = (scale>1?14*scale:16)+'px serif'; ctx.fillStyle = '#d2bda7';
+    ctx.fillText(name + '  ' + Math.ceil(hp) + ' / ' + maxHp, width / 2, y - (scale>1?8*scale:15));
+    this.bar(ctx, x, y, w, barH, hp / maxHp, '#74293c', '#ab4b58');
     if(feedback){
       const remaining=1-Game.clamp((feedback.age-18)/60,0,1);
       const edge=Math.min(maxHp,feedback.from+(feedback.to-feedback.from)*remaining);
-      if(edge>hp){ctx.fillStyle='#f8f4e9';ctx.fillRect(x+w*hp/maxHp,y,w*(edge-hp)/maxHp,12);}
+      if(edge>hp){ctx.fillStyle='#f8f4e9';ctx.fillRect(x+w*hp/maxHp,y,w*(edge-hp)/maxHp,barH);}
     }
     ctx.restore();
   }

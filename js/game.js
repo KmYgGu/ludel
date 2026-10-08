@@ -185,20 +185,22 @@
   function drawBossHud() {
     Game.Hud.boss(ctx,stage.id==='wineCellar'?Game.cellarBossLabel(fighter):slimeDef.name,encounter.totalHp(),slimeDef.maxHp,VIEW_WIDTH,WORLD.height,encounter.hpFeedback);
   }
-  function drawHp(actor) { Game.Hud.player(ctx, actor); if(Game.updateMobileHud)Game.updateMobileHud(actor,WORLD); }
+  function drawHp(actor) { Game.Hud.player(ctx, actor); }
 
   function drawTimer() {
+    const scale=Game.mobileHudScale?Game.mobileHudScale():1;
     const seconds = Math.ceil(WORLD.timer.remainingFrames / 60);
     const label = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
     ctx.save();
     ctx.textAlign = 'center';
     ctx.fillStyle = '#111018';
-    ctx.fillRect(VIEW_WIDTH / 2 - 88, 12, 176, 56);
+    const timerWidth=scale>1?96*scale:176;
+    ctx.fillRect(VIEW_WIDTH / 2 - timerWidth/2, 12, timerWidth, 56*scale);
     ctx.fillStyle = WORLD.timer.expired ? '#ed7465' : WORLD.timeStopped ? '#9fc9df' : '#e3d8c5';
-    ctx.font = '26px monospace';
-    ctx.fillText(label, VIEW_WIDTH / 2, 39);
-    ctx.font = '12px sans-serif';
-    ctx.fillText(WORLD.timer.expired ? '적 공격력 ×2' : WORLD.timeStopped ? '시간 정지' : '제한 시간', VIEW_WIDTH / 2, 58);
+    ctx.font = 26*scale+'px monospace';
+    ctx.fillText(label, VIEW_WIDTH / 2, 12+27*scale);
+    ctx.font = 12*scale+'px sans-serif';
+    ctx.fillText(WORLD.timer.expired ? '적 공격력 ×2' : WORLD.timeStopped ? '시간 정지' : '제한 시간', VIEW_WIDTH / 2, 12+46*scale);
     ctx.restore();
   }
 
