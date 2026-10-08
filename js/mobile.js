@@ -3,11 +3,11 @@
   const root=document.getElementById('mobile-controls');
   const setting=document.getElementById('reverse-mobile-controls');
   let lastHaptic=-Infinity;
-  Game.mobileHaptic=function(){
+  Game.mobileHaptic=function(duration=8,force=false){
     if(!media.matches || !window.navigator || typeof window.navigator.vibrate!=='function')return;
     const now=Date.now();
-    if(now-lastHaptic<45)return;
-    try { window.navigator.vibrate(8); lastHaptic=now; } catch (_) {}
+    if(!force&&now-lastHaptic<45)return;
+    try { window.navigator.vibrate(duration); lastHaptic=now; } catch (_) {}
   };
   document.addEventListener('pointerdown',function(event){
     const control=event.target.closest && event.target.closest('button, input[type="checkbox"]');
@@ -31,13 +31,21 @@
       await orientation.lock('portrait-primary');
     } catch (_) { /* CSS keeps a portrait layout when browser locking is unavailable. */ }
   };
+  Game.restoreMobileFullscreen=async function(){
+    if(!media.matches)return;
+    try {
+      if(!document.fullscreenElement && screenRoot.requestFullscreen)await screenRoot.requestFullscreen();
+    } catch (_) {}
+    await Game.lockMobilePortrait();
+  };
   document.getElementById('start-game').addEventListener('click',Game.lockMobilePortrait);
   document.addEventListener('fullscreenchange',function(){if(document.fullscreenElement)Game.lockMobilePortrait();});
   let reversed=false;
-  try { reversed=localStorage.getItem('rubania-mobile-reversed')==='true'; } catch (_) {}
+  const layoutKey='rubania-mobile-reversed-v2';
+  try { reversed=localStorage.getItem(layoutKey)==='true'; } catch (_) {}
   function applyLayout(){document.querySelector('.screen').classList.toggle('mobile-reversed',reversed);setting.checked=reversed;}
   applyLayout();
-  setting.addEventListener('change',function(){reversed=setting.checked;applyLayout();try{localStorage.setItem('rubania-mobile-reversed',String(reversed));}catch(_){} });
+  setting.addEventListener('change',function(){reversed=setting.checked;applyLayout();try{localStorage.setItem(layoutKey,String(reversed));}catch(_){} });
   Game.bindMobileInput=function(input,fighter){
     const stick=document.getElementById('mobile-stick'),knob=document.getElementById('mobile-stick-knob');
     let stickPointer=null,enabled=false;
@@ -49,10 +57,10 @@
       input.left=x < -0.25;input.right=x > 0.25;input.up=y < -0.25;input.down=y > 0.25;
       const next=input.axisX();
       const nextY=(input.down?1:0)-(input.up?1:0);
-      if(feedback && (next!==old || nextY!==oldY) && (next || nextY))Game.mobileHaptic();
+      if(feedback && (next!==old || nextY!==oldY) && (next || nextY))Game.mobileHaptic(20,true);
       if(next!==old){input.tap.released=true;if(next)input.tryRunTap(next,fighter);}
     }
-    function moveStick(event){
+    function moveStick(event,feedback=true){
       const box=stick.getBoundingClientRect(),radius=(stick.offsetWidth||box.width)*0.35;
       const dx=event.clientX-box.left-box.width/2,dy=event.clientY-box.top-box.height/2;
       const angle=window.screen && window.screen.orientation ? window.screen.orientation.angle : window.orientation;
@@ -60,9 +68,9 @@
       const rotation=rotated?(angle===270?Math.PI/2:-Math.PI/2):0;
       let x=(dx*Math.cos(rotation)+dy*Math.sin(rotation))/radius,y=(-dx*Math.sin(rotation)+dy*Math.cos(rotation))/radius;
       const length=Math.hypot(x,y);if(length>1){x/=length;y/=length;}
-      direction(x,y,true);knob.style.transform='translate('+x*radius+'px,'+y*radius+'px)';
+      direction(x,y,feedback);knob.style.transform='translate('+x*radius+'px,'+y*radius+'px)';
     }
-    stick.addEventListener('pointerdown',function(e){if(!playable()||stickPointer!==null)return;e.preventDefault();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);moveStick(e);});
+    stick.addEventListener('pointerdown',function(e){if(!playable()||stickPointer!==null)return;e.preventDefault();Game.mobileHaptic(20,true);stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);moveStick(e,false);});
     stick.addEventListener('pointermove',function(e){if(e.pointerId===stickPointer){e.preventDefault();moveStick(e);}});
     function releaseStick(e){if(e&&e.pointerId!==stickPointer)return;stickPointer=null;direction(0,0);knob.style.transform='';}
     ['pointerup','pointercancel','lostpointercapture'].forEach(type=>stick.addEventListener(type,releaseStick));

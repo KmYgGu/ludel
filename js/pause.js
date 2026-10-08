@@ -38,6 +38,7 @@
     });
     resume.addEventListener('click',function(){
       if(document.hidden || !Game.paused)return;
+      if(Game.restoreMobileFullscreen)Game.restoreMobileFullscreen();
       clearInput();lastFrame=null;edgeTouch=null;Game.paused=false;panel.hidden=true;document.getElementById('game').focus();
     });
   };

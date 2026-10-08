@@ -3,10 +3,11 @@ const nodes=new Map();function node(id){if(!nodes.has(id)){const classes=new Set
 global.document={getElementById:node,querySelector:()=>node('screen'),addEventListener(){}};
 node('screen').style.setProperty=function(key,value){this[key]=value};
 global.addEventListener=()=>{};const media={matches:true};global.matchMedia=()=>media;
-const storage=new Map();global.localStorage={getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)};
+const storage=new Map([['rubania-mobile-reversed','true']]);global.localStorage={getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)};
 let refresh;global.requestAnimationFrame=f=>refresh=f;
 for(const file of ['js/input.js','js/mobile.js'])vm.runInThisContext(fs.readFileSync(file,'utf8'));
 const input=new Game.Input(),fighter={def:{stats:{tapWindow:15}},canStartRun:()=>false};
+assert(!node('screen').classList.contains('mobile-reversed'),'old reversed preference resets to standard default');
 Game.menu={active:false};Game.bindMobileInput(input,fighter);
 function send(id,type,pointerId,x=100,y=100){for(const f of node(id).events[type]||[])f({pointerId,clientX:x,clientY:y,preventDefault(){}});}
 send('mobile-stick','pointerdown',1,170,100);assert(input.right);
@@ -20,7 +21,7 @@ send('mobile-dodge','pointerdown',5);assert(input.backstepPressed);
 assert(node('mobile-dodge').classList.contains('pressed'));send('mobile-dodge','pointerup',5);assert(!node('mobile-dodge').classList.contains('pressed'));
 node('game').width=1280;assert.equal(Game.mobileHudScale(),6.4,'existing canvas HUD scales to display width');
 node('reverse-mobile-controls').checked=true;send('reverse-mobile-controls','change',0);
-assert(node('screen').classList.contains('mobile-reversed'));assert.equal(storage.get('rubania-mobile-reversed'),'true');assert(!input.attack);
+assert(node('screen').classList.contains('mobile-reversed'));assert.equal(storage.get('rubania-mobile-reversed-v2'),'true');assert(!input.attack);
 Game.shop={active:true};refresh();assert(node('mobile-controls').hidden);input.clearEdges();send('mobile-jump','pointerdown',6);assert(!input.jumpPressed);
 Game.shop.active=false;refresh();assert(!node('mobile-controls').hidden);
 media.matches=false;refresh();assert(node('mobile-controls').hidden);
@@ -34,6 +35,7 @@ setImmediate(async()=>{
   global.screen.orientation.lock=async value=>{assert.equal(value,'portrait-primary');if(++attempts===1)throw Error('fullscreen required');};
   node('screen').requestFullscreen=async()=>{fullscreens++;document.fullscreenElement=node('screen')};
   await Game.lockMobilePortrait();assert.equal(attempts,2);assert.equal(fullscreens,1);
+  document.fullscreenElement=null;await Game.restoreMobileFullscreen();assert.equal(fullscreens,2,'resume requests fullscreen even if locking can succeed separately');
   global.screen.orientation.lock=async()=>{throw Error('not supported')};
   await Game.lockMobilePortrait();
   console.log('PASS: portrait lock fullscreen retry, safe rejection, rotated input and relocated timer.');
@@ -44,6 +46,7 @@ window.navigator.vibrate=duration=>pulses.push(duration);
 Game.mobileHaptic();Game.mobileHaptic();assert.deepEqual(pulses,[8],'brief vibration is throttled');
 now+=50;send('mobile-attack','pointerdown',11);assert.equal(pulses.length,2);send('mobile-attack','pointerup',11);
 now+=50;send('mobile-stick','pointerdown',12,100,30);assert.equal(pulses.length,3);
+assert.equal(pulses[2],20,'joystick touch gets a perceptible pulse');
 now+=50;send('mobile-stick','pointermove',12,100,25);assert.equal(pulses.length,3,'holding same direction does not vibrate continuously');
 send('mobile-stick','pointermove',12,170,100);assert.equal(pulses.length,4,'new vertical direction also vibrates');
 send('mobile-stick','pointerup',12);assert.equal(pulses.length,4,'releasing does not vibrate');
