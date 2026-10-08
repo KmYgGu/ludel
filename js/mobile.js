@@ -38,12 +38,22 @@
     action('mobile-attack','attack','attackPressed');
     action('mobile-jump','jump','jumpPressed');
     action('mobile-subweapon',null,'subweaponPressed');
-    document.getElementById('mobile-dodge').addEventListener('pointerdown',function(e){if(!playable())return;e.preventDefault();input.backstepPressed=true;});
+    action('mobile-dodge',null,'backstepPressed');
     function reset(){releaseStick();held.forEach(h=>h.button.classList.remove('pressed'));held.clear();input.jump=false;input.attack=false;input.clearEdges();}
     window.addEventListener('blur',reset);
     document.addEventListener('visibilitychange',function(){if(document.hidden)reset();});
     setting.addEventListener('change',reset);
     function refresh(){const active=playable();root.hidden=!active;if(enabled&&!active)reset();enabled=active;requestAnimationFrame(refresh);}
     refresh();
+  };
+  Game.updateMobileHud=function(actor,world){
+    if(!media.matches)return;
+    const pending=(actor.damageFeedback||[]).reduce((sum,effect)=>sum+effect.amount,0);
+    document.getElementById('mobile-health').textContent='체력 '+Math.ceil(Math.min(actor.maxHp,actor.hp+pending))+' / '+actor.maxHp;
+    document.getElementById('mobile-magic').textContent='마력 '+Math.floor(actor.mp)+' / '+actor.maxMp;
+    const seconds=Math.ceil(world.timer.remainingFrames/60);
+    document.getElementById('mobile-time').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0')+(world.timeStopped?' · 정지':world.timer.expired?' · 적 강화':'');
+    const names={knife:'나이프',cross:'십자가',axe:'도끼',holy:'성수',clock:'회중시계'};
+    document.getElementById('mobile-equipment').textContent=(names[actor.subweapon]||'')+' · 잔기 '+actor.lives;
   };
 })();

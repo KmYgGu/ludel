@@ -185,7 +185,7 @@
   function drawBossHud() {
     Game.Hud.boss(ctx,stage.id==='wineCellar'?Game.cellarBossLabel(fighter):slimeDef.name,encounter.totalHp(),slimeDef.maxHp,VIEW_WIDTH,WORLD.height,encounter.hpFeedback);
   }
-  function drawHp(actor) { Game.Hud.player(ctx, actor); }
+  function drawHp(actor) { Game.Hud.player(ctx, actor); if(Game.updateMobileHud)Game.updateMobileHud(actor,WORLD); }
 
   function drawTimer() {
     const seconds = Math.ceil(WORLD.timer.remainingFrames / 60);

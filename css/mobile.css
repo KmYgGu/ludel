@@ -2,25 +2,29 @@
 @media (pointer:coarse) and (max-width:900px) {
   html, body { width:100%; height:100%; overflow:hidden; overscroll-behavior:none; }
   body > p { display:none !important; }
-  .screen { width:100vw; height:100dvh; background:linear-gradient(#17131b,#0d0b12); overflow:hidden; }
-  .screen > #game { position:absolute; left:0; top:28%; width:100%; height:auto; display:block; }
+  .screen { width:100vw; height:100dvh; container-type:inline-size; background:linear-gradient(#17131b,#0d0b12); overflow:hidden; }
+  .screen > #game { position:absolute; left:0; top:22%; width:100%; height:auto; display:block; }
   #title-screen, .death-screen { z-index:10; }
   #title-screen { gap:12px; }
-  .menu-panel { box-sizing:border-box; width:min(85%,360px); max-width:90%; padding:20px; }
+  .menu-panel { box-sizing:border-box; width:min(85%,420px); max-width:90%; padding:20px; font-size:clamp(17px,4.6cqw,22px); }
   #main-menu button, .menu-panel button { min-height:48px; }
   .menu-panel .mobile-setting { display:block; }
   #mobile-controls:not([hidden]) { display:block; position:absolute; inset:0; z-index:4; pointer-events:none; touch-action:none; user-select:none; -webkit-user-select:none; }
-  #mobile-dodge { position:absolute; left:0; top:env(safe-area-inset-top,0px); width:65%; height:53%; pointer-events:auto; touch-action:none; }
-  .mobile-deck { position:absolute; left:max(12px,env(safe-area-inset-left)); right:max(12px,env(safe-area-inset-right)); bottom:max(20px,env(safe-area-inset-bottom)); height:clamp(160px,26vh,220px); }
-  #mobile-stick { position:absolute; left:0; bottom:8px; width:40vw; height:40vw; max-width:175px; max-height:175px; border:2px solid #70665e; border-radius:50%; background:#25212cbd; pointer-events:auto; touch-action:none; }
+  .mobile-status { position:absolute; top:max(16px,env(safe-area-inset-top)); left:5%; right:5%; display:grid; grid-template-columns:1fr 1fr; gap:10px; color:#eadcc6; font-size:clamp(16px,4.4cqw,24px); line-height:1.4; }
+  #mobile-health { color:#f2aaa8; } #mobile-magic { color:#c3b8f0; }
+  #mobile-time { font-variant-numeric:tabular-nums; }
+  #mobile-dodge { position:absolute; left:0; bottom:calc(38cqw + 20px); width:38cqw; min-height:48px; padding:8px 4px; border:2px solid #9d8463; border-radius:14px; background:#382c3ee8; color:#eee0c8; font-size:clamp(18px,4.8cqw,25px); pointer-events:auto; touch-action:none; -webkit-tap-highlight-color:transparent; }
+  #mobile-dodge.pressed { background:#784455; }
+  .mobile-deck { position:absolute; left:max(12px,env(safe-area-inset-left)); right:max(12px,env(safe-area-inset-right)); bottom:max(18px,env(safe-area-inset-bottom)); height:calc(38cqw + 80px); }
+  #mobile-stick { position:absolute; left:0; bottom:8px; width:38cqw; height:38cqw; box-sizing:border-box; border:2px solid #70665e; border-radius:50%; background:#25212cbd; pointer-events:auto; touch-action:none; }
   .stick-arrows { position:absolute; inset:10%; text-align:center; line-height:1.9; font-size:clamp(18px,5vw,25px); color:#b7aa98; pointer-events:none; }
   #mobile-stick-knob { position:absolute; width:36%; height:36%; top:32%; left:32%; border:1px solid #867663; border-radius:50%; background:#49404f; box-shadow:0 3px 8px #0009; pointer-events:none; }
-  .mobile-actions { position:absolute; right:0; bottom:0; width:49%; height:100%; }
-  .mobile-actions button { position:absolute; padding:0; width:clamp(60px,18vw,86px); height:clamp(60px,18vw,86px); min-height:0; border:2px solid #9d8463; border-radius:50%; background:#40222ee8; color:#eee0c8; font-size:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; pointer-events:auto; touch-action:none; -webkit-tap-highlight-color:transparent; }
-  .mobile-actions button span { font-size:27px; }
+  .mobile-actions { position:absolute; right:0; bottom:0; width:49%; height:calc(38cqw + 55px); }
+  .mobile-actions button { position:absolute; padding:0; width:19cqw; height:19cqw; min-height:56px; box-sizing:border-box; border:2px solid #9d8463; border-radius:50%; background:#40222ee8; color:#eee0c8; font-size:clamp(15px,4.1cqw,22px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; pointer-events:auto; touch-action:none; -webkit-tap-highlight-color:transparent; }
+  .mobile-actions button span { font-size:clamp(25px,7cqw,38px); }
   .mobile-actions button:focus, .mobile-actions button:hover { outline:none; background:#40222ee8; }
   .mobile-actions button.pressed { background:#784455; border-color:#e2c69d; transform:scale(.95); }
-  #mobile-attack { right:0; bottom:18px; width:clamp(72px,22vw,100px); height:clamp(72px,22vw,100px); }
+  #mobile-attack { right:0; bottom:18px; width:23cqw; height:23cqw; }
   #mobile-jump { left:0; bottom:0; }
   #mobile-subweapon { left:8%; top:0; }
   .mobile-reversed #mobile-dodge { left:auto; right:0; }
@@ -38,4 +42,7 @@
   .shop-actions button { min-height:44px; }
   .shop-item { min-height:52px; }
   .shop-dialogue { padding-bottom:max(12px,env(safe-area-inset-bottom)); overflow-y:auto; }
+  .shop-item-name, .shop-dialogue p { font-size:clamp(16px,4.3cqw,22px); }
+  .shop-item-kind, #shop-score { font-size:clamp(14px,3.8cqw,19px); }
+  .shop-categories button, .shop-actions button { font-size:clamp(15px,4cqw,20px); }
 }

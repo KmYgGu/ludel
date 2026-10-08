@@ -43,8 +43,12 @@
   <div class="screen">
     <canvas id="game" width="1280" height="720"></canvas>
     <div id="mobile-controls" hidden aria-label="터치 조작">
-      <div id="mobile-dodge" aria-label="백스텝 터치 영역"></div>
+      <div class="mobile-status" aria-label="플레이어 상태">
+        <div id="mobile-health"></div><div id="mobile-magic"></div>
+        <div id="mobile-time"></div><div id="mobile-equipment"></div>
+      </div>
       <div class="mobile-deck">
+        <button id="mobile-dodge" aria-label="회피 · 백스텝">↶ 회피</button>
         <div id="mobile-stick" aria-label="이동 조이패드"><span class="stick-arrows">▲<br>◀　　▶<br>▼</span><span id="mobile-stick-knob"></span></div>
         <div class="mobile-actions">
           <button id="mobile-attack" aria-label="공격"><span>⚔</span>공격</button>
