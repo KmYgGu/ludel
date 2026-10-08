@@ -39,7 +39,7 @@
     const stick=document.getElementById('mobile-stick'),knob=document.getElementById('mobile-stick-knob');
     let stickPointer=null,enabled=false;
     const held=new Map();
-    function playable(){return media.matches && !Game.paused && !(Game.menu&&Game.menu.active) && !Game.stageIntro && !Game.clearSequence && !Game.deathState && !(Game.shop&&Game.shop.active);}
+    function playable(){return media.matches && !(Game.arena&&Game.arena.active) && !Game.paused && !(Game.menu&&Game.menu.active) && !Game.stageIntro && !Game.clearSequence && !Game.deathState && !(Game.shop&&Game.shop.active);}
     function direction(x,y){
       const old=input.axisX();
       input.left=x < -0.25;input.right=x > 0.25;input.up=y < -0.25;input.down=y > 0.25;

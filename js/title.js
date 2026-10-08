@@ -3,6 +3,7 @@
   const main = document.getElementById('main-menu');
   const settings = document.getElementById('settings-menu');
   const ranking = document.getElementById('ranking-menu');
+  const arenaPanel=document.getElementById('arena-menu');
   const start = document.getElementById('start-game');
   const controls = document.querySelector('body > p');
   const debugStage = document.getElementById('debug-start-stage');
@@ -27,7 +28,7 @@
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
   }
   function show(panel) {
-    [main, settings, ranking].forEach(function (item) { item.hidden = item !== panel; });
+    [main, settings, ranking, arenaPanel].forEach(function (item) { if(item)item.hidden = item !== panel; });
     panel.querySelector('button').focus();
   }
   const preference = read('rubania-settings', { showControls: true });
@@ -39,6 +40,7 @@
     write('rubania-settings', preference);
   });
   document.getElementById('open-settings').addEventListener('click', function () { show(settings); });
+  document.getElementById('open-arena').addEventListener('click',function(){if(Game.arena&&Game.arena.unlocked())show(arenaPanel);});
   document.getElementById('open-ranking').addEventListener('click', function () {
     const list = document.getElementById('rank-list');
     list.replaceChildren();

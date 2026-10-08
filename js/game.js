@@ -42,12 +42,13 @@
     return !(Game.menu&&Game.menu.active) && !Game.deathState && !(Game.shop&&Game.shop.active);
   },function(){
     if(Game.resetMobileInput)Game.resetMobileInput();
+    if(Game.arena){Game.arena.last=null;Game.arena.acc=0;}
     Object.assign(input,new Game.Input());last=0;feedbackLast=null;acc=0;
   });
   canvas.addEventListener('mousedown', function (event) {
     if (event.button !== 1) return;
     event.preventDefault();
-    if (Game.paused || (Game.menu && Game.menu.active) || Game.stageIntro || Game.clearSequence || (Game.shop && Game.shop.active) || (fighter.hp <= 0 && !fighter.allowZeroHp)) return;
+    if ((Game.arena&&Game.arena.active) || Game.paused || (Game.menu && Game.menu.active) || Game.stageIntro || Game.clearSequence || (Game.shop && Game.shop.active) || (fighter.hp <= 0 && !fighter.allowZeroHp)) return;
     encounter.slimes.forEach(function (slime) { slime.hp = 0; });
     encounter.waves = [];
   });
@@ -58,8 +59,10 @@
       return;
     }
     Game.beginStageIntro('outerWall', stage.name, slimeDef.name);
+    if(Game.arena)Game.arena.encounterStage('outerWall');
   };
   function enterCellar() {
+    if(Game.arena)Game.arena.encounterStage('wineCellar');
     stage=Game.Stages.wineCellar;slimeDef=Game.Bosses.cellar;stageImage=cellarBackground;
     WORLD.width=1920;WORLD.arenaOrigin=0;
     WORLD.bg=stage.stone.shadow;
@@ -295,6 +298,7 @@
   function loop(t) {
     if(Game.checkPause)Game.checkPause(t);
     if(Game.paused){last=t;feedbackLast=t;acc=0;requestAnimationFrame(loop);return;}
+    if(Game.arena&&Game.arena.active){Game.arena.frame(t,ctx);last=t;feedbackLast=t;acc=0;requestAnimationFrame(loop);return;}
     const feedbackTicks=feedbackLast==null?0:Math.min(100,Math.max(0,t-feedbackLast))*60/1000;
     feedbackLast=t;
     Game.Hud.updateDamage(fighter,feedbackTicks,camera.x);
@@ -396,6 +400,8 @@
     Game.loadImage(slimeDef.sprite).then(function (img) { encounter.image = img; }),
     Game.loadImage(slimeDef.reactions.sprite).then(function (img) { encounter.reactionsImage = img; })
   ]).then(function () {
+    if(Game.arena)Game.arena.setup({outerWall:stageImage,wineCellar:cellarBackground,barrel:cellarBarrel,
+      slime:encounter.image,reactions:encounter.reactionsImage,cellar:cellarImage,animations:cellarAnimations});
     if (Game.menu) Game.menu.ready();
     requestAnimationFrame(loop);
   });

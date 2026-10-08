@@ -3,6 +3,16 @@
 #pause-screen[hidden] { display:none; }
 #pause-screen p { margin:0 0 22px; color:#c9bdcb; }
 #resume-game { min-height:48px; width:100%; }
+#arena-menu select { display:block; box-sizing:border-box; width:100%; margin-top:10px; padding:12px; background:#211e29; color:#e3d8c5; font:inherit; }
+#arena-menu button { display:block; width:100%; margin-top:14px; }
+#arena-controls { position:absolute; inset:0; z-index:6; pointer-events:none; color:#e3d8c5; }
+#arena-controls[hidden] { display:none; }
+.arena-scoreboard { position:absolute; top:10px; left:50%; transform:translateX(-50%); width:min(90%,680px); text-align:center; background:#100d17dc; padding:8px; font-size:16px; }
+.arena-scoreboard > div { display:inline-block; width:48%; margin:8px 0; }
+.arena-scoreboard progress { display:block; width:92%; height:12px; margin:6px auto; accent-color:#a5465c; }
+#arena-stage, #arena-result { display:block; }
+#arena-controls nav { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; gap:10px; pointer-events:auto; }
+#arena-controls button { white-space:nowrap; min-height:48px; }
 @media (pointer:coarse) and (max-width:900px), (pointer:coarse) and (orientation:landscape) and (max-height:600px) {
   html, body { width:100%; height:100%; overflow:hidden; overscroll-behavior:none; }
   body > p { display:none !important; }
@@ -10,6 +20,10 @@
   .screen > #game { position:absolute; left:0; top:22%; width:100%; height:auto; display:block; }
   #title-screen, .death-screen { z-index:10; }
   #title-screen { gap:12px; }
+  .arena-scoreboard { top:3%; font-size:clamp(14px,3.8cqw,20px); }
+  .arena-scoreboard > div { display:block; width:100%; }
+  #arena-controls nav { bottom:max(24px,env(safe-area-inset-bottom)); flex-wrap:wrap; justify-content:center; width:94%; }
+  #arena-controls button { padding:12px 16px; font-size:17px; }
   .menu-panel { box-sizing:border-box; width:min(85%,420px); max-width:90%; padding:20px; font-size:clamp(17px,4.6cqw,22px); }
   #main-menu button, .menu-panel button { min-height:48px; }
   #settings-menu:not([hidden]) { display:flex; flex-direction:column; align-items:stretch; gap:14px; }

@@ -52,6 +52,11 @@ Game.advanceStageIntro = function (milliseconds) {
     intro.elapsed > 3500 ? (4500 - intro.elapsed) / 1000 : 1;
 };
 Game.hitEffects = [];
+// Combat targets may be a player or a team containing multiple boss bodies.
+Game.combatOverlap = function (target, box) {
+  if(!target || !box)return false;
+  return target.selectHitBody ? target.selectHitBody(box) : Game.aabb(box,target.hurtBox?target.hurtBox():target);
+};
 
 Game.updateHitEffects = function () {
   Game.hitEffects = Game.hitEffects.filter(function (effect) { return --effect.life > 0; });

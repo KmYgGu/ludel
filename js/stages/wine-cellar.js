@@ -160,7 +160,7 @@ Game.CellarEncounter.prototype.update=function(fighter){
   });
   this.world.wineFires=(this.world.wineFires||[]).filter(fire=>{
     if(--fire.life<=0)return false;
-    if(fighter&&Game.aabb(fire,fighter.hurtBox()))fighter.takeHit({...fire,damage:12*(this.world.enemyDamageMultiplier||1)});
+    if(Game.combatOverlap(fighter,fire))fighter.takeHit({...fire,continuous:true,damage:12*(this.world.enemyDamageMultiplier||1)});
     return true;
   });
   if(this.fastFlash>0)this.fastFlash--;
@@ -281,7 +281,7 @@ Game.CellarEncounter.prototype.update=function(fighter){
         const frame=this.counterFrame();
         const center=actor.x+actor.w/2,rearReach=actor.w/2+80;
         const box={x:this.facing>0?center-rearReach:center-120,y:this.world.floorY-145,w:120+rearReach,h:100};
-        if(frame>=6&&!this.counterConnected&&Game.aabb(box,fighter.hurtBox())){
+        if(frame>=6&&!this.counterConnected&&Game.combatOverlap(fighter,box)){
           this.counterConnected=fighter.launchFromCounter({...box,damage:26*(this.world.enemyDamageMultiplier||1)},this.facing);
         }
         if(this.phaseTick>=28){this.phase='idle';this.phaseTick=0;this.cooldown=90;}
@@ -343,7 +343,7 @@ Game.CellarEncounter.prototype.update=function(fighter){
         const area=this.lockedTarget;
         this.spillWine(area.x+area.w/2,area.y+area.h/2);
         this.fastImpact={...area,life:8};
-        if(Game.aabb(area,fighter.hurtBox()))fighter.takeHit({...area,damage:30*(this.world.enemyDamageMultiplier||1)});
+        if(Game.combatOverlap(fighter,area))fighter.takeHit({...area,damage:30*(this.world.enemyDamageMultiplier||1)});
         this.reticle=null;
       }
     }else if(this.phase==='fastshoot1'){
@@ -384,8 +384,10 @@ Game.CellarEncounter.prototype.update=function(fighter){
         return false;
       }
     }
-    if(fighter&&Game.aabb(sweep,fighter)){
-      fighter.takeHit({...bullet,damage:bullet.damage*(this.world.enemyDamageMultiplier||1)});return false;
+    if(Game.combatOverlap(fighter,sweep)){
+      if(fighter.selectHitBody)bullet.hitBodies=bullet.hitBodies||new Set();
+      fighter.takeHit({...bullet,damage:bullet.damage*(this.world.enemyDamageMultiplier||1)});
+      if(!fighter.selectHitBody)return false;
     }
     return bullet.x+bullet.w>=0&&bullet.x<=this.world.width&&bullet.y+bullet.h>=0&&bullet.y<=this.world.floorY;
   });
@@ -481,7 +483,7 @@ Game.CellarEncounter.prototype.updateEvasion=function(fighter){
   const urgency=1-Game.clamp(actor.hp/actor.maxHp,0,1);
   const distance=Math.abs(dx),height=Math.abs(fighter.y+fighter.h-this.world.floorY);
   if(dx*this.facing<=0||dx*fighter.facing>=0||height>230)return;
-  const judgedReach=490+(this.random()-0.5)*100;
+  const judgedReach=(fighter.combatState?fighter.combatState.reach:490)+(this.random()-0.5)*100;
   if(distance>judgedReach)return;
   const missRoll=this.random();
   const low=fighter.attackKind==='crouch';

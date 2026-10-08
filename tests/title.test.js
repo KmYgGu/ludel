@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const elements=new Map();
 function element(id){if(!elements.has(id))elements.set(id,{hidden:false,disabled:true,children:[],events:{},addEventListener(k,v){this.events[k]=v;},focus(){},querySelector(){return element(id+'-button');},replaceChildren(){this.children=[];},appendChild(c){this.children.push(c);}});return elements.get(id);}
 const backs=[element('settings-back'),element('ranking-back')];
-global.window=global;global.Game={};
+global.window=global;global.Game={Stages:{outerWall:{id:'outerWall',name:'Outer wall'},wineCellar:{id:'wineCellar',name:'Cellar'}}};
 global.document={getElementById:element,querySelector:element,querySelectorAll:()=>backs,createElement:()=>({})};
 const values=new Map();global.localStorage={getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)};
 vm.runInThisContext(fs.readFileSync('js/title.js','utf8'));

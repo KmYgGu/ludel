@@ -348,14 +348,14 @@ Game.SlimeEncounter.prototype.resolveContact = function (fighter) {
     fighter.onKickConnect();
   }
   this.slimes.forEach(function (slime) {
-    if (slime.hp > 0 && slime.pressImpact && fighter.kickInvuln <= 0 && Game.aabb(fighter.hurtBox(), slime.attack)) {
+    if (slime.hp > 0 && slime.pressImpact && fighter.kickInvuln <= 0 && Game.combatOverlap(fighter, slime.attack)) {
       fighter.takeHit(Object.assign({}, slime.attack, {damage: this.def.press.damage * damageMultiplier}));
     }
-    if (slime.hp > 0 && fighter.kickInvuln <= 0 && Game.aabb(fighter.hurtBox(), slime.attack)) {
+    if (slime.hp > 0 && fighter.kickInvuln <= 0 && Game.combatOverlap(fighter, slime.attack)) {
       const hpBefore = fighter.hp;
       const damage = slime.ceilingState === 'fall' ? this.def.ceiling.damage
         : slime.press === 'flight' && slime.vy > 0 ? this.def.press.damage : slime.attack.damage;
-      fighter.takeHit(Object.assign({}, slime.attack, {damage: damage * damageMultiplier}));
+      fighter.takeHit(Object.assign({}, slime.attack, {continuous:true,damage: damage * damageMultiplier}));
       if (fighter.hp < hpBefore) {
         if (slime.ceilingState === 'fall' || slime.ceilingState === 'knocked') slime.ceilingState = null;
         this.recoil(slime, fighter);
@@ -363,7 +363,7 @@ Game.SlimeEncounter.prototype.resolveContact = function (fighter) {
     }
   }, this);
   this.waves.forEach(function (wave) {
-    if (!wave.hit && Game.aabb(fighter.hurtBox(), wave)) {
+    if (!wave.hit && Game.combatOverlap(fighter, wave)) {
       const hpBefore = fighter.hp;
       fighter.takeHit(Object.assign({}, wave, {damage: wave.damage * damageMultiplier}));
       if (fighter.hp < hpBefore) wave.hit = true;

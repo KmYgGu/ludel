@@ -63,6 +63,7 @@
         <button id="start-game" disabled>게임시작</button>
         <button id="open-settings">설정</button>
         <button id="open-ranking">랭킹</button>
+        <button id="open-arena" disabled>투기장 · 보스 2종 조우 시 해금</button>
       </nav>
       <section class="menu-panel" id="settings-menu" hidden>
         <h2>설정</h2>
@@ -77,6 +78,20 @@
         <ol id="rank-list"></ol>
         <button data-back>돌아가기</button>
       </section>
+      <section class="menu-panel" id="arena-menu" hidden>
+        <h2>투기장</h2><p>조우한 보스들의 일대일 대결을 관전합니다.</p>
+        <label>대결 <select id="arena-match" aria-label="보스 대결 선택"></select></label>
+        <p>전장은 무작위 · 본편 능력치 · 보상 없음</p>
+        <button id="arena-start">대결 시작</button><button data-back>돌아가기</button>
+      </section>
+    </section>
+    <section id="arena-controls" hidden aria-label="투기장 관전">
+      <div class="arena-scoreboard"><span id="arena-stage"></span>
+        <div><span id="arena-health-0"></span><progress id="arena-bar-0"></progress></div>
+        <div><span id="arena-health-1"></span><progress id="arena-bar-1"></progress></div>
+        <strong id="arena-result" aria-live="polite"></strong>
+      </div>
+      <nav><button id="arena-pause">일시정지</button><button id="arena-replay">재경기</button><button id="arena-exit">타이틀로</button></nav>
     </section>
     <section id="death-screen" hidden class="death-screen">
       <h2 id="death-title"></h2>
@@ -115,6 +130,7 @@
   <script src="js/bosses/slime.js"></script>
   <script src="js/stages/outer-wall.js"></script>
   <script src="js/stages/wine-cellar.js"></script>
+  <script src="js/arena.js"></script>
   <script src="js/title.js"></script>
   <script src="js/shop-system.js"></script>
   <script src="js/shop.js"></script>
