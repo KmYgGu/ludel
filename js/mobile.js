@@ -1,7 +1,27 @@
 (function () {
-  const media=window.matchMedia('(pointer:coarse) and (max-width:900px)');
+  const media=window.matchMedia('(pointer:coarse) and (max-width:900px), (pointer:coarse) and (orientation:landscape) and (max-height:600px)');
   const root=document.getElementById('mobile-controls');
   const setting=document.getElementById('reverse-mobile-controls');
+  const screenRoot=document.querySelector('.screen');
+  function syncOrientation(){
+    const angle=window.screen && window.screen.orientation ? window.screen.orientation.angle : window.orientation;
+    screenRoot.style.setProperty('--portrait-rotation',(angle===270?90:-90)+'deg');
+  }
+  window.addEventListener('resize',syncOrientation);
+  window.addEventListener('orientationchange',syncOrientation);
+  syncOrientation();
+  Game.lockMobilePortrait=async function(){
+    if(!media.matches)return;
+    const orientation=window.screen && window.screen.orientation;
+    if(!orientation || !orientation.lock)return;
+    try { await orientation.lock('portrait-primary'); return; } catch (_) {}
+    try {
+      if(!document.fullscreenElement && screenRoot.requestFullscreen)await screenRoot.requestFullscreen();
+      await orientation.lock('portrait-primary');
+    } catch (_) { /* CSS keeps a portrait layout when browser locking is unavailable. */ }
+  };
+  document.getElementById('start-game').addEventListener('click',Game.lockMobilePortrait);
+  document.addEventListener('fullscreenchange',function(){if(document.fullscreenElement)Game.lockMobilePortrait();});
   let reversed=false;
   try { reversed=localStorage.getItem('rubania-mobile-reversed')==='true'; } catch (_) {}
   function applyLayout(){document.querySelector('.screen').classList.toggle('mobile-reversed',reversed);setting.checked=reversed;}
@@ -19,8 +39,12 @@
       if(next!==old){input.tap.released=true;if(next)input.tryRunTap(next,fighter);}
     }
     function moveStick(event){
-      const box=stick.getBoundingClientRect(),radius=box.width*0.35;
-      let x=(event.clientX-box.left-box.width/2)/radius,y=(event.clientY-box.top-box.height/2)/radius;
+      const box=stick.getBoundingClientRect(),radius=(stick.offsetWidth||box.width)*0.35;
+      const dx=event.clientX-box.left-box.width/2,dy=event.clientY-box.top-box.height/2;
+      const angle=window.screen && window.screen.orientation ? window.screen.orientation.angle : window.orientation;
+      const rotated=window.innerWidth>window.innerHeight;
+      const rotation=rotated?(angle===270?Math.PI/2:-Math.PI/2):0;
+      let x=(dx*Math.cos(rotation)+dy*Math.sin(rotation))/radius,y=(-dx*Math.sin(rotation)+dy*Math.cos(rotation))/radius;
       const length=Math.hypot(x,y);if(length>1){x/=length;y/=length;}
       direction(x,y);knob.style.transform='translate('+x*radius+'px,'+y*radius+'px)';
     }
@@ -48,6 +72,13 @@
   };
   Game.mobileHudScale=function(){
     const canvas=document.getElementById('game');
-    return media.matches ? canvas.width/Math.max(1,canvas.getBoundingClientRect().width) : 1;
+    return media.matches ? canvas.width/Math.max(1,canvas.offsetWidth||canvas.getBoundingClientRect().width) : 1;
+  };
+  Game.drawMobileTimer=function(world,label){
+    if(!media.matches)return false;
+    document.getElementById('mobile-timer-value').textContent=label;
+    document.getElementById('mobile-timer-label').textContent=world.timer.expired?'적 공격력 ×2':world.timeStopped?'시간 정지':'제한 시간';
+    document.getElementById('mobile-timer').style.color=world.timer.expired?'#ed7465':world.timeStopped?'#9fc9df':'#e3d8c5';
+    return true;
   };
 })();

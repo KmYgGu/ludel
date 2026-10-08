@@ -1,6 +1,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');global.window=global;
 const nodes=new Map();function node(id){if(!nodes.has(id)){const classes=new Set();nodes.set(id,{events:{},style:{},classList:{add:c=>classes.add(c),remove:c=>classes.delete(c),toggle(c,on){on?classes.add(c):classes.delete(c)},contains:c=>classes.has(c)},addEventListener(k,f){(this.events[k]||=[]).push(f)},setPointerCapture(){},getBoundingClientRect:()=>({left:0,top:0,width:200,height:200})});}return nodes.get(id);}
 global.document={getElementById:node,querySelector:()=>node('screen'),addEventListener(){}};
+node('screen').style.setProperty=function(key,value){this[key]=value};
 global.addEventListener=()=>{};const media={matches:true};global.matchMedia=()=>media;
 const storage=new Map();global.localStorage={getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)};
 let refresh;global.requestAnimationFrame=f=>refresh=f;
@@ -23,4 +24,18 @@ assert(node('screen').classList.contains('mobile-reversed'));assert.equal(storag
 Game.shop={active:true};refresh();assert(node('mobile-controls').hidden);input.clearEdges();send('mobile-jump','pointerdown',6);assert(!input.jumpPressed);
 Game.shop.active=false;refresh();assert(!node('mobile-controls').hidden);
 media.matches=false;refresh();assert(node('mobile-controls').hidden);
+assert.equal(Game.drawMobileTimer({timer:{}},'00:12'),false,'desktop timer stays inside game');
+media.matches=true;global.innerWidth=800;global.innerHeight=390;global.screen={orientation:{angle:90}};
+send('mobile-stick','pointerdown',10,100,30);assert(input.right&&!input.down,'rotated joystick respects portrait directions');send('mobile-stick','pointerup',10);
+Game.drawMobileTimer({timer:{expired:false},timeStopped:true},'01:12');
+assert.equal(node('mobile-timer-value').textContent,'01:12');assert.equal(node('mobile-timer-label').textContent,'시간 정지');
+setImmediate(async()=>{
+  let attempts=0,fullscreens=0;
+  global.screen.orientation.lock=async value=>{assert.equal(value,'portrait-primary');if(++attempts===1)throw Error('fullscreen required');};
+  node('screen').requestFullscreen=async()=>{fullscreens++;document.fullscreenElement=node('screen')};
+  await Game.lockMobilePortrait();assert.equal(attempts,2);assert.equal(fullscreens,1);
+  global.screen.orientation.lock=async()=>{throw Error('not supported')};
+  await Game.lockMobilePortrait();
+  console.log('PASS: portrait lock fullscreen retry, safe rejection, rotated input and relocated timer.');
+});
 console.log('PASS: touch multitouch, diagonals, cancellation, mirrored saved layout, overlay and desktop blocking.');

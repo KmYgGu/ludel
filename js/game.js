@@ -191,6 +191,7 @@
     const scale=Game.mobileHudScale?Game.mobileHudScale():1;
     const seconds = Math.ceil(WORLD.timer.remainingFrames / 60);
     const label = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
+    if(Game.drawMobileTimer && Game.drawMobileTimer(WORLD,label))return;
     ctx.save();
     ctx.textAlign = 'center';
     ctx.fillStyle = '#111018';

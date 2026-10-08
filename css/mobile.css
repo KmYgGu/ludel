@@ -1,5 +1,5 @@
 .menu-panel .mobile-setting, #mobile-controls { display:none; }
-@media (pointer:coarse) and (max-width:900px) {
+@media (pointer:coarse) and (max-width:900px), (pointer:coarse) and (orientation:landscape) and (max-height:600px) {
   html, body { width:100%; height:100%; overflow:hidden; overscroll-behavior:none; }
   body > p { display:none !important; }
   .screen { width:100vw; height:100dvh; container-type:inline-size; background:linear-gradient(#17131b,#0d0b12); overflow:hidden; }
@@ -15,6 +15,9 @@
   #settings-menu button:focus { outline:none; }
   .menu-panel .mobile-setting { display:block; }
   #mobile-controls:not([hidden]) { display:block; position:absolute; inset:0; z-index:4; pointer-events:none; touch-action:none; user-select:none; -webkit-user-select:none; }
+  #mobile-timer { position:absolute; top:8%; left:50%; transform:translateX(-50%); background:#111018; color:#e3d8c5; padding:8px 18px; text-align:center; }
+  #mobile-timer strong { display:block; font:26px monospace; font-weight:normal; }
+  #mobile-timer span { display:block; margin-top:6px; font-size:14px; white-space:nowrap; }
   #mobile-dodge { position:absolute; left:0; bottom:calc(38cqw + 20px); width:43cqw; min-height:72px; height:20cqw; box-sizing:border-box; padding:12px 4px; border:2px solid #9d8463; border-radius:14px; background:#382c3ee8; color:#eee0c8; font-size:clamp(20px,5.4cqw,28px); pointer-events:auto; touch-action:none; -webkit-tap-highlight-color:transparent; }
   #mobile-dodge.pressed { background:#784455; }
   .mobile-deck { position:absolute; left:max(12px,env(safe-area-inset-left)); right:max(12px,env(safe-area-inset-right)); bottom:max(18px,env(safe-area-inset-bottom)); height:calc(58cqw + 20px); }
@@ -47,4 +50,7 @@
   .shop-item-name, .shop-dialogue p { font-size:clamp(16px,4.3cqw,22px); }
   .shop-item-kind, #shop-score { font-size:clamp(14px,3.8cqw,19px); }
   .shop-categories button, .shop-actions button { font-size:clamp(15px,4cqw,20px); }
+}
+@media (pointer:coarse) and (orientation:landscape) and (max-height:600px) {
+  .screen { position:fixed; left:50%; top:50%; width:100dvh; height:100dvw; transform:translate(-50%,-50%) rotate(var(--portrait-rotation,-90deg)); }
 }
